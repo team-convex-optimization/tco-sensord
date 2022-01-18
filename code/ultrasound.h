@@ -1,21 +1,19 @@
 #ifndef ULTRASOUND_H_
 #define ULTRASOUND_H_
 
-#include <sys/time.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>
+#include <time.h>
 
-#include "tco_libd.h"
-#include "gpio.h"
-
+#include "tco_libd.h" /* Includes the GPIO interface */
 
 #define NANO_SEC_TO_SEC 1000000000.0f
 #define SPEED_OF_SOUND_CM_HALF 17150 /* (1/2)speed of sound in cm/s. */
 
 typedef struct {
-    struct gpiod_line *trig;
-    struct gpiod_line *echo;
+    gpio_handle_t *trig;
+    gpio_handle_t *echo;
 } sensor_ultrasound;
 
 /**

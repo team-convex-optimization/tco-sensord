@@ -15,11 +15,9 @@ clang \
     -I /usr/include \
     -I ../lib/tco_shmem \
     -I ../lib/tco_libd/include \
-    -l pthread \
-    -l rt \
-    -l gpiod \
+    -lgpiod \
     ../code/*.c \
     tco_libd.a \
-    -o tco_sensord.bin \
+    -o tco-sensord.bin \
     -O 
 popd

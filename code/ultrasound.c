@@ -1,6 +1,6 @@
 #include "ultrasound.h"
 
-void *us_init(int gpio_trig, int gpio_echo)
+sensor_ultrasound *us_init(int gpio_trig, int gpio_echo)
 {
     sensor_ultrasound *us = (sensor_ultrasound *)malloc(sizeof(sensor_ultrasound));
     us->echo = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));

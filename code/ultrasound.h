@@ -22,7 +22,7 @@ typedef struct {
  * @param gpio_echo GPIO pin with the ultrasound echo
  * @return NULL of failure, a void * to the sensor_ultrasound struct
  */
-void *us_init(int gpio_trig, int gpio_echo);
+sensor_ultrasound *us_init(int gpio_trig, int gpio_echo);
 
 /**
  * @brief Returns the distance from a given ultrasound sensor

@@ -15,6 +15,7 @@ clang \
     -I /usr/include \
     -I ../lib/tco_shmem \
     -I ../lib/tco_libd/include \
+    -pthread \
     -lgpiod \
     ../code/*.c \
     tco_libd.a \

@@ -4,5 +4,5 @@ Reads data from physical ports and writes data to shmem for other processes to u
 
 ## Dependencies
  - Clang
- - LLVM
+ - libi2c-dev
  - libgpiod-dev

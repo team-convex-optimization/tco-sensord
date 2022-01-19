@@ -11,8 +11,8 @@
 #include "tco_libd.h"
 #include "ultrasound.h"
 
-#define ULTRASOUND_TRIGGER 27
-#define ULTRASOUND_ECHO 22
+#define ULTRASOUND_TRIGGER 18
+#define ULTRASOUND_ECHO 16
 #define MIN_DRIVE_CLEARANCE 50.0f /* Minimum clearance the US sensor must read to not raise emergency flag */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;

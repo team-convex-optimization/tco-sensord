@@ -17,8 +17,10 @@ clang \
     -I ../lib/tco_libd/include \
     -pthread \
     -lgpiod \
+    -lrt \
     ../code/*.c \
     tco_libd.a \
     -o tco_sensord.bin \
     -O 
 popd
+

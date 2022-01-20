@@ -48,13 +48,13 @@ int main(int argc, const char *argv[]) {
         printf("Failed to initialize the logger\n");
         return EXIT_FAILURE;
     }
-
+/*
     if (shmem_map(TCO_SHMEM_NAME_CONTROL, TCO_SHMEM_SIZE_CONTROL, TCO_SHMEM_NAME_SEM_CONTROL, O_WRONLY, (void **)&control_data, &control_data_sem) != 0)
     {
         log_error("Failed to map shared memory and associated semaphore");
         return EXIT_FAILURE;
     }
-
+*/
     us = us_init(ULTRASOUND_TRIGGER, ULTRASOUND_ECHO);
     assert(us != NULL);
 

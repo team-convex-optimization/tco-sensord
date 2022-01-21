@@ -1,8 +1,11 @@
 #include "ultrasound.h"
 
-sensor_ultrasound *us_init(int gpio_trig, int gpio_echo)
+void *us_init(const void **args)
 {
-    sensor_ultrasound *us = (sensor_ultrasound *)malloc(sizeof(sensor_ultrasound));
+    int gpio_trig = ((int *) args)[0];
+    int gpio_echo = ((int *) args)[1];
+	
+	sensor_ultrasound *us = (sensor_ultrasound *)malloc(sizeof(sensor_ultrasound));
     us->echo = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
     us->trig = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
     
@@ -15,7 +18,7 @@ sensor_ultrasound *us_init(int gpio_trig, int gpio_echo)
         return NULL;
     }
     log_info("Ultrasound sensor has been correctly initialized");
-    return us;
+    return (void *)us;
 }
 
 double us_get_distance(sensor_ultrasound *us) 
@@ -64,7 +67,7 @@ void us_cleanup(sensor_ultrasound *us)
     free(us);
     log_info("Ultrasound sensor has been cleaned up");
 }
-
+/*
 void us_test(int gpio_trig, int gpio_echo, int num_pings)
 {
     sensor_ultrasound *us = (sensor_ultrasound *)us_init(gpio_trig, gpio_echo);
@@ -82,7 +85,7 @@ void us_test(int gpio_trig, int gpio_echo, int num_pings)
     printf("\nTest complete. cleaning...\n");
     us_cleanup(us);
 }
-
+*/
 void us_usage() {
     printf("Ultrasound sensor test mode:\n"
            "Run the program with './<program> -u <trigger_pin> <echo_pin> <num_pings>' where:\n"

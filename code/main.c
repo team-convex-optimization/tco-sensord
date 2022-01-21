@@ -5,11 +5,13 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "tco_shmem.h"
 #include "tco_libd.h"
 #include "ultrasound.h"
+#include "sensor.h"
 
 #define ULTRASOUND_TRIGGER 73 /* GPIO 16 */
 #define ULTRASOUND_ECHO 138 /* GPIO 18 */
@@ -54,22 +56,11 @@ int main(int argc, const char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    us = us_init(ULTRASOUND_TRIGGER, ULTRASOUND_ECHO);
-    if (!us) {
-	log_error("Failed to initialize the US sensor");
-    	return 0;
-    }
-    while (1) {
-        if (us_get_distance(us) < MIN_DRIVE_CLEARANCE) { /* XXX : As more reads are read, combine sem_wait into one call */
-            sem_wait(control_data_sem);
-            control_data->emergency = 1;
-            sem_post(control_data_sem);
-        } else {
-            sem_wait(control_data_sem);
-            control_data->emergency = 0;
-            sem_post(control_data_sem);
-        }
-    }
+	void *us_init_1 = malloc(2 * sizeof(int));
+	int *args = (int *) us_init_1;
+	args[0] = ULTRASOUND_TRIGGER;
+    args[1] = ULTRASOUND_ECHO;
+	add_sensor(us_init, &us_init_1, us_cleanup, 1);
 
 
     return 0;

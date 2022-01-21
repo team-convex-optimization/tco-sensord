@@ -5,9 +5,9 @@ sensor_ultrasound *us_init(int gpio_trig, int gpio_echo)
     sensor_ultrasound *us = (sensor_ultrasound *)malloc(sizeof(sensor_ultrasound));
     us->echo = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
     us->trig = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
-
-    error_t err1 = gpio_handle_get(us->trig, 2, GPIO_DIR_OUT, 9);
-    error_t err2 = gpio_handle_get(us->echo, 4, GPIO_DIR_IN, 10);
+    
+    error_t err1 = gpio_handle_get(us->trig, gpio_trig/32, GPIO_DIR_OUT, gpio_trig%32);
+    error_t err2 = gpio_handle_get(us->echo, gpio_echo/32, GPIO_DIR_IN, gpio_echo%32);
 
     if ((err1 | err2) != ERR_OK)
     {
@@ -18,30 +18,43 @@ sensor_ultrasound *us_init(int gpio_trig, int gpio_echo)
     return us;
 }
 
-double us_get_distance(sensor_ultrasound *us) /* TODO : Check err codes */
+double us_get_distance(sensor_ultrasound *us) 
 {
     struct timespec start_spec, end_spec;
-    enum gpio_val val;
+    enum gpio_val val = GPIO_VAL_LOW;
 
     /* Send pulse */
-    gpio_line_write(us->trig, GPIO_VAL_HIGH);
-    usleep(10000);
+    if (gpio_line_write(us->trig, GPIO_VAL_LOW) != ERR_OK) goto fail;
+    usleep(2); /* Clear the state of the pin */
+    if (gpio_line_write(us->trig, GPIO_VAL_HIGH) != ERR_OK) goto fail;
+    usleep(10);
     gpio_line_write(us->trig, GPIO_VAL_LOW);
     
     /* Receive pulse */
     do {
-        gpio_line_read(us->echo, &val);
+         if (gpio_line_read(us->echo, &val) != ERR_OK) {
+		 goto fail;
+	 }
     } while (val == GPIO_VAL_LOW);
+    
     clock_gettime(_POSIX_MONOTONIC_CLOCK, &start_spec);
+	
     do {
-        gpio_line_read(us->echo, &val);
-    } while (val == GPIO_VAL_LOW);
+    	if (gpio_line_read(us->echo, &val) != ERR_OK) {
+		goto fail;
+	}
+     } while (val == GPIO_VAL_HIGH);
+    
     clock_gettime(_POSIX_MONOTONIC_CLOCK, &end_spec);
 
     /* Calculate the length of the pulse in seconds */
     long double rtt = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
     double distance = rtt * SPEED_OF_SOUND_CM_HALF;
     return distance;
+
+fail:
+    log_error("Failed to read/write to GPIO pin");
+    return 0.0f;
 }
 
 void us_cleanup(sensor_ultrasound *us)

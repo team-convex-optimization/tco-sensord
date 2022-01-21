@@ -6,13 +6,13 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
-
+#include <stdio.h>
 #include "tco_shmem.h"
 #include "tco_libd.h"
 #include "ultrasound.h"
 
-#define ULTRASOUND_TRIGGER 18
-#define ULTRASOUND_ECHO 16
+#define ULTRASOUND_TRIGGER 73 /* GPIO 16 */
+#define ULTRASOUND_ECHO 138 /* GPIO 18 */
 #define MIN_DRIVE_CLEARANCE 50.0f /* Minimum clearance the US sensor must read to not raise emergency flag */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
@@ -31,7 +31,6 @@ static void handle_signals(int sig)
         free(us);
     if (sem_post(control_data_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
-
     exit(0);
 }
 
@@ -48,16 +47,15 @@ int main(int argc, const char *argv[]) {
         printf("Failed to initialize the logger\n");
         return EXIT_FAILURE;
     }
-/*
-    if (shmem_map(TCO_SHMEM_NAME_CONTROL, TCO_SHMEM_SIZE_CONTROL, TCO_SHMEM_NAME_SEM_CONTROL, O_WRONLY, (void **)&control_data, &control_data_sem) != 0)
+
+    if (shmem_map(TCO_SHMEM_NAME_CONTROL, TCO_SHMEM_SIZE_CONTROL, TCO_SHMEM_NAME_SEM_CONTROL, O_RDWR, (void **)&control_data, &control_data_sem) != 0)
     {
         log_error("Failed to map shared memory and associated semaphore");
         return EXIT_FAILURE;
     }
-*/
+
     us = us_init(ULTRASOUND_TRIGGER, ULTRASOUND_ECHO);
     assert(us != NULL);
-
     while (1) {
         if (us_get_distance(us) < MIN_DRIVE_CLEARANCE) { /* XXX : As more reads are read, combine sem_wait into one call */
             sem_wait(control_data_sem);

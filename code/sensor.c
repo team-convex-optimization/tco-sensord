@@ -4,14 +4,14 @@ sensors_t sensors = {0, NULL};
 pthread_t *threads = NULL;
 
 void *sensor_start(void *ptr) {
-	printf("Now I am here!\n");
 	sensor_t *sensor = (sensor_t *)ptr;
-	double d = 0.0f;
+	double val = 0.0f;
 	while (1) {
-		d = (*sensor->read)(sensor->reference);
-		printf("read value %f\n", d);
-		sleep(1);
+		val = (*sensor->read)(sensor->reference);
+		printf("read value %f\n", val);
+		usleep(sensor->interval);
 	}
+	return NULL;
 }
 
 int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval) {
@@ -25,17 +25,20 @@ int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned
 
 	sensors.sensors = realloc(sensors.sensors, sizeof(sensor_t) * ++sensors.count);
 	memcpy((void *)&sensors.sensors[sensors.count - 1], s, sizeof(sensor_t));
+	return 0;
 }
 
 int initialize_sensors() {
-	log_info("Preparing sensors");
-	threads = malloc(sensors.count * sizeof(pthread_t));
+	threads = (pthread_t *) malloc(sensors.count * sizeof(pthread_t));
 	for (int i = 0; i < sensors.count; i++) {
 		sensor_t *sense = &sensors.sensors[i];
 		sense->reference = (*sense->init)(sense->init_args);
-		//pthread_create(&(threads[i]), NULL, sensor_start, NULL);
+		if (pthread_create(&threads[i], NULL, *sensor_start, (void *) sense) != 0) {
+			log_error("failed to start a thread");
+		}
 	}
-	sensor_start((void *)&sensors.sensors[0]);
+	pthread_join(threads[0], NULL); /* DELETE ME */
+	return 0;
 }
 
 int cleanup_sensors() {
@@ -46,5 +49,6 @@ int cleanup_sensors() {
 		free(sense);
 	}
 	free(sensors.sensors);
+	return 0;
 }
 

@@ -29,8 +29,6 @@ sem_t *control_data_sem;
  */
 static void handle_signals(int sig)
 {
-    if (us)
-        free(us);
     if (sem_post(control_data_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
     exit(0);
@@ -57,9 +55,7 @@ int main(int argc, const char *argv[]) {
     }
 
 	void *us_init_1 = malloc(2 * sizeof(int));
-	int *args = (int *) us_init_1;
-	args[0] = ULTRASOUND_TRIGGER;
-    args[1] = ULTRASOUND_ECHO;
+	us_init_1 = (int[2]) {ULTRASOUND_TRIGGER, ULTRASOUND_ECHO};
 	add_sensor(us_init, &us_init_1, us_cleanup, us_get_distance, 1);
 	initialize_sensors();
 

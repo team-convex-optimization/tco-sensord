@@ -19,8 +19,9 @@
  */
 typedef struct {
 	void *reference;
-	void *cleanup;
-	void *(*init)(void **);
+	void (*cleanup)(void); /* A function to cleanup the object */
+	void *(*init)(void **); /* A function to initialize the object */
+	double *(*read)(void *); /* A function to read the value. parameter must be reference and return a double */
 	void **init_args;
 	unsigned int interval;
 } sensor_t;

@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) {
 	args[0] = ULTRASOUND_TRIGGER;
     args[1] = ULTRASOUND_ECHO;
 	add_sensor(us_init, &us_init_1, us_cleanup, 1);
-
+	initialize_sensors();
 
     return 0;
 }

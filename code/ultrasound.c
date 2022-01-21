@@ -2,9 +2,9 @@
 
 void *us_init(const void **args)
 {
-    int gpio_trig = ((int *) args)[0];
-    int gpio_echo = ((int *) args)[1];
-	
+    int gpio_trig = ((int *) *args)[0];
+    int gpio_echo = ((int *) *args)[1];
+	printf("Args 1 and 2 are %d %d\n", gpio_trig, gpio_echo);
 	sensor_ultrasound *us = (sensor_ultrasound *)malloc(sizeof(sensor_ultrasound));
     us->echo = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
     us->trig = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));

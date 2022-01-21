@@ -4,7 +4,7 @@ sensors_t sensors = {0, NULL};
 pthread_t *threads = NULL;
 
 void *sensor_start(void *ptr) {
-	
+		
 }
 
 int add_sensor(void *init, void **init_args, void *cleanup, unsigned int interval) {
@@ -24,7 +24,6 @@ int initialize_sensors() {
 	threads = malloc(sensors.count * sizeof(pthread_t));
 	for (int i = 0; i < sensors.count; i++) {
 		sensor_t *sense = &sensors.sensors[i];
-		//sense->reference = (((void *)(void **))sense->init)(sense->init_args);
 		sense->reference = (*sense->init)(sense->init_args);
 		pthread_create(&(threads[i]), NULL, sensor_start, NULL);
 	}	
@@ -34,7 +33,7 @@ int cleanup_sensors() {
 	log_info("Cleaning up sensors");
 	for (int i = 0; i < sensors.count; i++) {
 		sensor_t *sense = &sensors.sensors[i];
-		((void(*)())sense->cleanup)();
+		(sense->cleanup)();
 		free(sense);
 	}
 	free(sensors.sensors);

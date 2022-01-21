@@ -55,7 +55,10 @@ int main(int argc, const char *argv[]) {
     }
 
     us = us_init(ULTRASOUND_TRIGGER, ULTRASOUND_ECHO);
-    assert(us != NULL);
+    if (!us) {
+	log_error("Failed to initialize the US sensor");
+    	return 0;
+    }
     while (1) {
         if (us_get_distance(us) < MIN_DRIVE_CLEARANCE) { /* XXX : As more reads are read, combine sem_wait into one call */
             sem_wait(control_data_sem);

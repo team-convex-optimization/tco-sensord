@@ -45,7 +45,7 @@ int cleanup_sensors() {
 	log_info("Cleaning up sensors");
 	for (int i = 0; i < sensors.count; i++) {
 		sensor_t *sense = &sensors.sensors[i];
-		(sense->cleanup)();
+		(sense->cleanup)(sense->reference);
 		free(sense);
 	}
 	free(sensors.sensors);

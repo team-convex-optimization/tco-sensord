@@ -54,10 +54,11 @@ int main(int argc, const char *argv[]) {
         return EXIT_FAILURE;
     }
 
-	void *us_init_1 = malloc(2 * sizeof(int));
-	us_init_1 = (int[2]) {ULTRASOUND_TRIGGER, ULTRASOUND_ECHO};
-	add_sensor(us_init, &us_init_1, us_cleanup, us_get_distance, 1);
+	void *us_1 = malloc(2 * sizeof(int));
+	us_1 = (int[2]) {ULTRASOUND_TRIGGER, ULTRASOUND_ECHO};
+	add_sensor(us_init, &us_1, us_cleanup, us_get_distance, 200000); /* 5 times a second */
 	initialize_sensors();
+
 
     return 0;
 }

@@ -12,16 +12,17 @@
 /**
  * @brief This stucture contains a sensor module that will be pulled by the main loop. Every parameter 
  * requires a specific format. Each of these sensors is run in a seperate thread.
- * @param reference is a pointer to the object reference. Leave this unchanged. 
+ * @param reference is a pointer to the object reference. This is instantiated by the @p init function. 
  * @param clean_up is a reference to the function to cleanup any resources a sensor's object may have
  * taken
  * @param init is a function reference to the init method for the sensor. It must have form init(void **args) and the args are provided by init_args. 
  * @param init_args is a malloc´d reference to the function paramaters expected by the sensor.
+ * @param read is a function ptr to a method that reads a single value of a sensor
  * @param interval is the number of useconds to wait before reading a new value
  */
 typedef struct {
 	void *reference;
-	void (*cleanup)(void); /* A function to cleanup the object */
+	void (*cleanup)(void *); /* A function to cleanup the object */
 	void *(*init)(void **); /* A function to initialize the object */
 	double (*read)(void *); /* A function to read the value. parameter must be reference and return a double */
 	void **init_args;

@@ -4,6 +4,8 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #include "tco_libd.h"
 
@@ -21,7 +23,7 @@ typedef struct {
 	void *reference;
 	void (*cleanup)(void); /* A function to cleanup the object */
 	void *(*init)(void **); /* A function to initialize the object */
-	double *(*read)(void *); /* A function to read the value. parameter must be reference and return a double */
+	double (*read)(void *); /* A function to read the value. parameter must be reference and return a double */
 	void **init_args;
 	unsigned int interval;
 } sensor_t;
@@ -45,7 +47,7 @@ typedef struct {
  * @param cleanup a ptr to the cleanup function
  * @param interval the number of useconds to wait between polls on the sensor
  */
-int add_sensor(void *init, void **init_args, void *cleanup, unsigned int interval);
+int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval);
 
 /* 
  * @brief initialize all sensors in the sensor struct. This includes giving them all to a seperate thread.

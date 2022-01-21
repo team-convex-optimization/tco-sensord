@@ -6,3 +6,6 @@ build/*
 
 # Logger output
 log.txt
+
+# swp files
+code/*.swp

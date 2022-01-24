@@ -53,6 +53,7 @@ double us_get_distance(sensor_ultrasound *us)
     /* Calculate the length of the pulse in seconds */
     long double rtt = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
     double distance = rtt * SPEED_OF_SOUND_CM_HALF;
+    if (distance < 0) distance = 0.0f;
     return distance;
 
 fail:

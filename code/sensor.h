@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "tco_libd.h"
 
@@ -59,5 +60,10 @@ int initialize_sensors();
  * @brief cleanup all sensors in the sensor struct
  */
 int cleanup_sensors();
+
+/**
+ * @brief register a signal handler pointed by @p hndlr
+ */
+void register_signal_handler(void *hndlr);
 
 #endif /* SENSOR_H_ */

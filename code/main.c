@@ -18,7 +18,6 @@
 #define MIN_DRIVE_CLEARANCE 50.0f /* Minimum clearance the US sensor must read to not raise emergency flag */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
-sensor_ultrasound *us;
 struct tco_shmem_data_control *control_data;
 sem_t *control_data_sem;
 
@@ -27,21 +26,16 @@ sem_t *control_data_sem;
  * clontrold is closed
  * @param sig Signal number. This is ignored since this handler is registered for the right signals already.
  */
-static void handle_signals(int sig)
+static void handle_signals_master(int sig)
 {
-    if (sem_post(control_data_sem) == -1)
+	cleanup_sensors();
+    if (control_data_sem && sem_post(control_data_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
     exit(0);
 }
 
 int main(int argc, const char *argv[]) {
-    struct sigaction sa;
-    sa.sa_handler = handle_signals;
-    sigfillset(&sa.sa_mask);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-
+	register_signal_handler(handle_signals_master);
     if (log_init("sensord", "./log.txt") != 0)
     {
         printf("Failed to initialize the logger\n");
@@ -53,12 +47,17 @@ int main(int argc, const char *argv[]) {
         log_error("Failed to map shared memory and associated semaphore");
         return EXIT_FAILURE;
     }
-
+	
+	/* Add sensor definitions here */
 	void *us_1 = malloc(2 * sizeof(int));
-	us_1 = (int[2]) {ULTRASOUND_TRIGGER, ULTRASOUND_ECHO};
+	us_1 = (int[2]) {73, 138}; /* trig pin 73, echo pin 138 */
 	add_sensor(us_init, &us_1, us_cleanup, us_get_distance, 200000); /* 5 times a second */
+	
+	/* End sensor defintion */
 	initialize_sensors();
+	
+	/* Wait for the first thread. They either all run and there must be at least 1 sensor for this program to be running with any sense */
 
-
+	//pthread_join(threads[0], NULL); /* DELETE ME */
     return 0;
 }

@@ -4,7 +4,7 @@ sensors_t sensors = {0, NULL};
 pthread_t *threads = NULL;
 
 void signal_handler_child(int sig) {
-	/* Do here anything a thread must */
+	/* Do here anything a thread must. A few last words */
 	exit(0);
 }
 
@@ -23,14 +23,16 @@ void register_signal_handler(void (*hndlr)(int)) {
 void *sensor_start(void *ptr) {
 	sensor_t *sensor = (sensor_t *)ptr;
 	while (1) {
+		pthread_mutex_lock(&sensor->mutex);
 		*sensor->result = (*sensor->read)(sensor->reference); /* TODO: Add mutex */
+		pthread_mutex_unlock(&sensor->mutex);
 		printf("read value %f\n", *sensor->result);
 		usleep(sensor->interval);
 	}
 	return NULL;
 }
 
-int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval, double *result) {
+pthread_mutex_t *add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval, double *result) {
 	sensor_t *s = (sensor_t *)malloc(sizeof(sensor_t));
 	s->init = init;
 	s->cleanup = cleanup;
@@ -39,6 +41,10 @@ int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned
 	s->read = read;
 	s->reference = NULL;
 	s->result = result;
+	if (pthread_mutex_init(&s->mutex, NULL) != 0) {
+		log_error("Failed to initialize Mutex!");
+		return NULL;
+	}
 
 	sensors.sensors = realloc(sensors.sensors, sizeof(sensor_t) * ++sensors.count);
 	memcpy((void *)&sensors.sensors[sensors.count - 1], s, sizeof(sensor_t));
@@ -46,7 +52,7 @@ int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned
 	/* Register the signal handler */
 	register_signal_handler(&signal_handler_child);
 
-	return 0;
+	return &s->mutex;
 }
 
 int initialize_sensors(void) {
@@ -68,6 +74,7 @@ int cleanup_sensors(void) {
 		if (pthread_kill(threads[i], SIGKILL) != 0)
 			log_error("Failed to kill signal for thread %d", i);
 		(sense->cleanup)(sense->reference);
+		pthread_mutex_destroy(&sense->mutex);
 	}
 	free(sensors.sensors);
 	return 0;

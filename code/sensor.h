@@ -26,9 +26,10 @@ typedef struct {
 	void (*cleanup)(void *); /* A function to cleanup the object */
 	void *(*init)(void **); /* A function to initialize the object */
 	double (*read)(void *); /* A function to read the value. parameter must be reference and return a double */
-	void **init_args;
-	unsigned int interval;
-	double *result;
+	void **init_args; /* A malloc´d ptr of memory for init() */
+	unsigned int interval; /* Number of usec to wait between reading of sensors */
+	double *result; /* Address to write values to */
+	pthread_mutex_t mutex; /* A mutex to ensure thread-safe RW on critical section */
 } sensor_t;
 
 /**
@@ -50,8 +51,9 @@ typedef struct {
  * @param cleanup a ptr to the cleanup function
  * @param interval the number of useconds to wait between polls on the sensor
  * @param result a reference to a double where you wish results are stored. 
+ * @return the corresponding mutex needed for *result to prevent bad reads due to concurrency
  */
-int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval, double *result);
+pthread_mutex_t *add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval, double *result);
 
 /* 
  * @brief initialize all sensors in the sensor struct. This includes giving them all to a seperate thread.

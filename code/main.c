@@ -49,9 +49,10 @@ int main(int argc, const char *argv[]) {
 
 	/* Add sensor definitions here */
 	double values[SENSOR_COUNT] = {0};
+	pthread_mutex_t *locks[SENSOR_COUNT];
 	void *us_1 = malloc(2 * sizeof(int));
 	us_1 = (int[2]) {73, 138}; /* trig pin 73, echo pin 138 */
-	add_sensor(us_init, (void **) &us_1, us_cleanup, us_get_distance, 200000, &values[0]); /* 5 times a second */
+	locks[0] = add_sensor(us_init, (void **) &us_1, us_cleanup, us_get_distance, 200000, &values[0]); /* 5 times a second */
 
 	/* End sensor definition */
 	initialize_sensors();
@@ -61,8 +62,9 @@ int main(int argc, const char *argv[]) {
 	while (1) {
 		for (int i = 0; i < SENSOR_COUNT; i++)
 		{
-			/* TODO : Acquire MUTEX */
-			memcpy(&values[i], &values_copy[i], sizeof(double));	
+			pthread_mutex_lock(locks[i]); /* Read latest value */
+			memcpy(&values[i], &values_copy[i], sizeof(double));
+			pthread_mutex_unlock(locks[i]);
 		}
 		sem_wait(plan_data_sem);
 		/* Enter Critical Section */

@@ -33,13 +33,13 @@ void *sensor_start(void *ptr) {
 }
 
 int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval) {
-	sensor_t *s = calloc(1, sizeof(sensor_t));
-	s->init = init;
-	s->cleanup = cleanup;
-	s->interval = interval;
-	s->init_args = init_args;
-	s->read = read;
-	s->reference = NULL;
+	sensor_t s;
+	s.init = init;
+	s.cleanup = cleanup;
+	s.interval = interval;
+	s.init_args = init_args;
+	s.read = read;
+	s.reference = NULL;
 
 	sensors.sensors = realloc(sensors.sensors, sizeof(sensor_t) * ++sensors.count);
 	memcpy((void *)&sensors.sensors[sensors.count - 1], s, sizeof(sensor_t));
@@ -56,7 +56,7 @@ int initialize_sensors(void) {
 		sensor_t *sense = &sensors.sensors[i];
 		sense->reference = (*sense->init)(sense->init_args);
 		if (pthread_create(&threads[i], NULL, *sensor_start, (void *) sense) != 0) {
-			log_error("failed to start a thread");
+			log_error("Failed to start a thread with ID %d \n", i);
 		}
 	}
 	return 0;

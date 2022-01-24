@@ -18,8 +18,8 @@
 #define MIN_DRIVE_CLEARANCE 50.0f /* Minimum clearance the US sensor must read to not raise emergency flag */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
-struct tco_shmem_data_control *control_data;
-sem_t *control_data_sem;
+struct tco_shmem_data_plan *plan_data;
+sem_t *plan_data_sem;
 
 /**
  * @brief Handler for signals. This ensures that deadlocks in shmems do not occur and  when
@@ -29,7 +29,7 @@ sem_t *control_data_sem;
 static void handle_signals_master(int sig)
 {
 	cleanup_sensors();
-    if (control_data_sem && sem_post(control_data_sem) == -1)
+    if (plan_data_sem && sem_post(plan_data_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
     exit(0);
 }
@@ -42,7 +42,7 @@ int main(int argc, const char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (shmem_map(TCO_SHMEM_NAME_CONTROL, TCO_SHMEM_SIZE_CONTROL, TCO_SHMEM_NAME_SEM_CONTROL, O_RDWR, (void **)&control_data, &control_data_sem) != 0)
+    if (shmem_map(TCO_SHMEM_NAME_PLAN, TCO_SHMEM_SIZE_PLAN, TCO_SHMEM_NAME_SEM_PLAN, O_RDWR, (void **)&plan_data, &plan_data_sem) != 0)
     {
         log_error("Failed to map shared memory and associated semaphore");
         return EXIT_FAILURE;

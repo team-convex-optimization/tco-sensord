@@ -42,7 +42,7 @@ int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned
 	s.reference = NULL;
 
 	sensors.sensors = realloc(sensors.sensors, sizeof(sensor_t) * ++sensors.count);
-	memcpy((void *)&sensors.sensors[sensors.count - 1], s, sizeof(sensor_t));
+	memcpy((void *)&sensors.sensors[sensors.count - 1], &s, sizeof(sensor_t));
 
 	/* Register the signal handler */
 	register_signal_handler(signal_handler_child);

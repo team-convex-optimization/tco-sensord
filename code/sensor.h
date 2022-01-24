@@ -28,6 +28,7 @@ typedef struct {
 	double (*read)(void *); /* A function to read the value. parameter must be reference and return a double */
 	void **init_args;
 	unsigned int interval;
+	double *result;
 } sensor_t;
 
 /**
@@ -45,11 +46,12 @@ typedef struct {
 /*
  * @brief add a sensor to the monolothic sensor structure
  * @param init a ptr to the init function
- * @param init_args a ptr to a malloc´d array needed for the init of the sensor function
+ * @param init_args a ptr to an array needed for the init of the sensor function
  * @param cleanup a ptr to the cleanup function
  * @param interval the number of useconds to wait between polls on the sensor
+ * @param result a reference to a double where you wish results are stored. 
  */
-int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval);
+int add_sensor(void *init, void **init_args, void *cleanup, void *read, unsigned int interval, double *result);
 
 /* 
  * @brief initialize all sensors in the sensor struct. This includes giving them all to a seperate thread.
@@ -64,6 +66,6 @@ int cleanup_sensors();
 /**
  * @brief register a signal handler pointed by @p hndlr
  */
-void register_signal_handler(void *hndlr);
+void register_signal_handler(void (*hndlr)(int));
 
 #endif /* SENSOR_H_ */

@@ -68,7 +68,7 @@ int main(int argc, const char *argv[]) {
 		}
 		sem_wait(plan_data_sem);
 		/* Enter Critical Section */
-
+		plan_data->ultrasound_left = values_copy[0];
 		/* Exit Critical Section */
 		sem_post(plan_data_sem);
 		usleep(UPDATE_RATE);

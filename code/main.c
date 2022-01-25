@@ -14,7 +14,7 @@
 #include "sensor.h"
 #include "hall_effect.h"
 
-#define UPDATE_RATE (1000000/60.0f) /* Seconds to wait before writing new sensor data to shmem */ 
+#define UPDATE_RATE (1000000/30.0f) /* Seconds to wait before writing new sensor data to shmem */ 
 #define SENSOR_COUNT 2 /* Amount of sensors in use */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
@@ -54,11 +54,11 @@ int main(int argc, const char *argv[]) {
 	
 	void *us_1 = malloc(2 * sizeof(int));
 	us_1 = (int[2]) {73, 138}; /* trig pin 73, echo pin 138 */
-	locks[0] = add_sensor(us_init, (void **) &us_1, us_cleanup, us_get_distance, 200000, &values[0]); /* 5 times a second */
+	locks[0] = add_sensor(us_init, (void **) &us_1, us_cleanup, us_get_distance, 200000, &(values[0])); /* 5 times a second */
 
 	void *he_1 = malloc(sizeof(int)); 
 	he_1 = (int[1]) {6}; /* pole is connect to pole 6 */
-	locks[1] = add_sensor(hall_effect_init, (void **) &he_1, hall_effect_cleanup, hall_effect_read, 1000000.0/60.0f, &values[1]);
+	locks[1] = add_sensor(hall_effect_init, (void **) &he_1, hall_effect_cleanup, hall_effect_read, 1000000.0/30.0f, &(values[1]));
 	/* End sensor definition */
 	initialize_sensors();
 	
@@ -68,9 +68,11 @@ int main(int argc, const char *argv[]) {
 		for (int i = 0; i < SENSOR_COUNT; i++)
 		{
 			pthread_mutex_lock(locks[i]); /* Read latest value */
-			memcpy(&values[i], &values_copy[i], sizeof(double));
+			memcpy(&values_copy[i], &values[i], sizeof(double));
 			pthread_mutex_unlock(locks[i]);
 		}
+		printf("rpm is %f\n", values_copy[1]);
+		printf("us is %f\n", values_copy[0]);
 		sem_wait(plan_data_sem);
 		/* Enter Critical Section */
 		plan_data->ultrasound_left = values_copy[0];

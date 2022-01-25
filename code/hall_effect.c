@@ -1,4 +1,5 @@
 #include "hall_effect.h"
+#include <stdio.h>
 
 void *hall_effect_init(const void **args) {
 	log_info("Hall Effect sensor is being initialized");
@@ -47,9 +48,9 @@ double hall_effect_read(sensor_halleffect_t *he) {
 	clock_gettime(_POSIX_MONOTONIC_CLOCK, &end_spec);
 	
 	/* Calculate frequency */
-	double time = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
+	long double time = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
 	time *= 2; /* Get period -> get high state length * 2 for full wave_length */
-	return 1.0/time; /* Freq = 1 / period */
+	return (1.0/time) * MOTOR_TO_WHEEL_RATIO * NUMBER_OF_POLES; /* Freq = 1 / period */
 
 fail:
 	log_error("Failed to read the hall_effect sensor!");

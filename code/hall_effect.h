@@ -8,6 +8,8 @@
 #include "tco_libd.h"
 
 #define NANO_SEC_TO_SEC 1000000000.0f
+#define MOTOR_TO_WHEEL_RATIO 3.2f
+#define NUMBER_OF_POLES 3.0f
 
 typedef struct {
 	gpio_handle_t *pole;

@@ -2,8 +2,12 @@
 #define HALL_EFFECT_H_
 
 #include <time.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#include <tco_libd.h>
+#include "tco_libd.h"
+
+#define NANO_SEC_TO_SEC 1000000000.0f
 
 typedef struct {
 	gpio_handle_t *pole;

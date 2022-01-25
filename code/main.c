@@ -12,9 +12,10 @@
 #include "tco_libd.h"
 #include "ultrasound.h"
 #include "sensor.h"
+#include "hall_effect.h"
 
 #define UPDATE_RATE (1000000/60.0f) /* Seconds to wait before writing new sensor data to shmem */ 
-#define SENSOR_COUNT 1 /* Amount of sensors in use */
+#define SENSOR_COUNT 2 /* Amount of sensors in use */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
 struct tco_shmem_data_plan *plan_data;
@@ -50,10 +51,14 @@ int main(int argc, const char *argv[]) {
 	/* Add sensor definitions here */
 	double values[SENSOR_COUNT] = {0};
 	pthread_mutex_t *locks[SENSOR_COUNT];
+	
 	void *us_1 = malloc(2 * sizeof(int));
 	us_1 = (int[2]) {73, 138}; /* trig pin 73, echo pin 138 */
 	locks[0] = add_sensor(us_init, (void **) &us_1, us_cleanup, us_get_distance, 200000, &values[0]); /* 5 times a second */
 
+	void *he_1 = malloc(sizeof(int)); 
+	he_1 = (int[1]) {6}; /* pole is connect to pole 6 */
+	locks[1] = add_sensor(hall_effect_init, (void **) &he_1, hall_effect_cleanup, hall_effect_read, 1000000.0/60.0f, &values[1]);
 	/* End sensor definition */
 	initialize_sensors();
 	
@@ -69,6 +74,7 @@ int main(int argc, const char *argv[]) {
 		sem_wait(plan_data_sem);
 		/* Enter Critical Section */
 		plan_data->ultrasound_left = values_copy[0];
+		plan_data->hall_effect_rpm = values_copy[1];
 		/* Exit Critical Section */
 		sem_post(plan_data_sem);
 		usleep(UPDATE_RATE);

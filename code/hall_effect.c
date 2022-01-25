@@ -50,6 +50,7 @@ double hall_effect_read(sensor_halleffect_t *he) {
 	/* Calculate frequency */
 	long double time = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
 	time *= 2; /* Get period -> get high state length * 2 for full wave_length */
+	if (time < 0) time = 1000.0f; 
 	return (1.0/time) * MOTOR_TO_WHEEL_RATIO * NUMBER_OF_POLES; /* Freq = 1 / period */
 
 fail:

@@ -24,27 +24,41 @@ fail:
 }
 
 double hall_effect_read(sensor_halleffect_t *he) {
-	struct timespec start_spec, end_spec;
+	struct timespec start_spec, end_spec, timeout_spec, current_spec;
 	enum gpio_val val;
 
 	/* Wait until low state */
+	clock_gettime(_POSIX_MONOTONIC_CLOCK, &timeout_spec);
 	do {
 		if(gpio_line_read(he->pole, &val) != ERR_OK)
 			goto fail;
+
+		clock_gettime(_POSIX_MONOTONIC_CLOCK, &current_spec);
+		if (current_spec.tv_nsec - timeout_spec.tv_nsec > WAIT_LIMIT)
+				goto still;
 	} while (val == GPIO_VAL_HIGH);
 	
 	/* Wait for high state to start */
+	clock_gettime(_POSIX_MONOTONIC_CLOCK, &timeout_spec);
 	do {
 		if(gpio_line_read(he->pole, &val) != ERR_OK)
 			goto fail;
+		clock_gettime(_POSIX_MONOTONIC_CLOCK, &current_spec);
+		if (current_spec.tv_nsec - timeout_spec.tv_nsec > WAIT_LIMIT)
+				goto still;
 	} while (val == GPIO_VAL_LOW);
 	clock_gettime(_POSIX_MONOTONIC_CLOCK, &start_spec);
 
 	/* Wait for high state to end */
+	clock_gettime(_POSIX_MONOTONIC_CLOCK, &timeout_spec);
 	do {
 		if(gpio_line_read(he->pole, &val) != ERR_OK)
 			goto fail;
+		clock_gettime(_POSIX_MONOTONIC_CLOCK, &current_spec);
+		if (current_spec.tv_nsec - timeout_spec.tv_nsec > WAIT_LIMIT)
+				goto still;
 	} while (val == GPIO_VAL_HIGH);
+	
 	clock_gettime(_POSIX_MONOTONIC_CLOCK, &end_spec);
 	
 	/* Calculate frequency */
@@ -55,6 +69,7 @@ double hall_effect_read(sensor_halleffect_t *he) {
 
 fail:
 	log_error("Failed to read the hall_effect sensor!");
+still:
 	return 0.0f;
 }
 

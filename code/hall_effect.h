@@ -10,6 +10,7 @@
 #define NANO_SEC_TO_SEC 1000000000.0f
 #define MOTOR_TO_WHEEL_RATIO 3.2f
 #define NUMBER_OF_POLES 3.0f
+#define WAIT_LIMIT 150000000UL
 
 typedef struct {
 	gpio_handle_t *pole;

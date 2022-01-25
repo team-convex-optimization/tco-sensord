@@ -71,8 +71,6 @@ int main(int argc, const char *argv[]) {
 			memcpy(&values_copy[i], &values[i], sizeof(double));
 			pthread_mutex_unlock(locks[i]);
 		}
-		printf("rpm is %f\n", values_copy[1]);
-		printf("us is %f\n", values_copy[0]);
 		sem_wait(plan_data_sem);
 		/* Enter Critical Section */
 		plan_data->ultrasound_left = values_copy[0];

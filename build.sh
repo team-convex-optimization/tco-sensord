@@ -18,6 +18,8 @@ clang \
     -pthread \
     -lgpiod \
     -lrt \
+    -lc \
+    -g \
     ../code/*.c \
     tco_libd.a \
     -o tco_sensord.bin \

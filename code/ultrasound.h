@@ -18,11 +18,12 @@ typedef struct {
 
 /**
  * @brief will initialize an ultrasound sensor with given GPIO ports
- * @param gpio_trig GPIO pin with the ultrasound trigger
- * @param gpio_echo GPIO pin with the ultrasound echo
+ * @param args is a malloc´d ptr to an array of the following parameters
+ * @param (@p args[0]) gpio_trig GPIO pin with the ultrasound trigger
+ * @param (@p args[1]) gpio_echo GPIO pin with the ultrasound echo
  * @return NULL of failure, a void * to the sensor_ultrasound struct
  */
-sensor_ultrasound *us_init(int gpio_trig, int gpio_echo);
+void *us_init(const void **args);
 
 /**
  * @brief Returns the distance from a given ultrasound sensor

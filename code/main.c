@@ -18,8 +18,8 @@
 #define SENSOR_COUNT 2 /* Amount of sensors in use */
 
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
-struct tco_shmem_data_plan *plan_data;
-sem_t *plan_data_sem;
+struct tco_shmem_data_sensor *shmem_sensor_data;
+sem_t *shmem_sensor_sem;
 /**
  * @brief Handler for signals. This ensures that deadlocks in shmems do not occur and  when
  * clontrold is closed
@@ -28,7 +28,7 @@ sem_t *plan_data_sem;
 void handle_signals_master(int sig)
 {
 	cleanup_sensors();
-    if (plan_data_sem && sem_post(plan_data_sem) == -1)
+    if (shmem_sensor_sem && sem_post(shmem_sensor_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
     exit(0);
 }
@@ -41,9 +41,9 @@ int main(int argc, const char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (shmem_map(TCO_SHMEM_NAME_PLAN, TCO_SHMEM_SIZE_PLAN, TCO_SHMEM_NAME_SEM_PLAN, O_RDWR, (void **)&plan_data, &plan_data_sem) != 0)
+    if (shmem_map(TCO_SHMEM_NAME_SENSOR, TCO_SHMEM_SIZE_SENSOR, TCO_SHMEM_NAME_SEM_SENSOR, O_RDWR, (void **)&shmem_sensor_data, &shmem_sensor_sem) != 0)
     {
-        log_error("Failed to map shared memory and associated semaphore");
+        log_error("Failed to map shared memory and associated semaphore for sensor data");
         return EXIT_FAILURE;
     }
 
@@ -70,12 +70,12 @@ int main(int argc, const char *argv[]) {
 			memcpy(&values_copy[i], &values[i], sizeof(double));
 			pthread_mutex_unlock(locks[i]);
 		}
-		sem_wait(plan_data_sem);
+		sem_wait(shmem_sensor_sem);
 		/* Enter Critical Section */
-		plan_data->ultrasound_left = values_copy[0];
-		plan_data->hall_effect_rpm = values_copy[1];
+		shmem_sensor_data->ultrasound_left = values_copy[0];
+		shmem_sensor_data->hall_effect_rpm = values_copy[1];
 		/* Exit Critical Section */
-		sem_post(plan_data_sem);
+		sem_post(shmem_sensor_sem);
 		usleep(UPDATE_RATE);
 	}
 

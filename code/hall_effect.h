@@ -10,10 +10,13 @@
 #define NANO_SEC_TO_SEC 1000000000.0f
 #define MOTOR_TO_WHEEL_RATIO 3.2f
 #define NUMBER_OF_POLES 3.0f
-#define WAIT_LIMIT 150000000UL
+#define WAIT_LIMIT 30000000UL
+
+#define FILTER_SIZE 3
 
 typedef struct {
 	gpio_handle_t *pole;
+	float prev_results[5];
 } sensor_halleffect_t;
 
 /**

@@ -23,6 +23,21 @@ fail:
 	return NULL;
 }
 
+void add_to_results(sensor_halleffect_t *he, double val) {
+	for (int i = 1; i < FILTER_SIZE; i++) {
+		he->prev_results[i - 1] = he->prev_results[i];
+	}
+	he->prev_results[FILTER_SIZE - 1] = val;
+}
+
+double get_avg_result(sensor_halleffect_t *he) {
+	double res = 0;
+	for (int i = 0; i < FILTER_SIZE; i++) {
+		res += he->prev_results[i];
+	}
+	return res/(double)FILTER_SIZE;
+}
+
 double hall_effect_read(sensor_halleffect_t *he) {
 	struct timespec start_spec, end_spec, timeout_spec, current_spec;
 	enum gpio_val val;
@@ -65,12 +80,14 @@ double hall_effect_read(sensor_halleffect_t *he) {
 	long double time = ((end_spec.tv_nsec - start_spec.tv_nsec)/NANO_SEC_TO_SEC);
 	time *= 2; /* Get period -> get high state length * 2 for full wave_length */
 	if (time < 0) time = 1000.0f; 
-	return (1.0/time) * MOTOR_TO_WHEEL_RATIO * NUMBER_OF_POLES; /* Freq = 1 / period */
-
+	double res =  (1.0/time) * MOTOR_TO_WHEEL_RATIO * NUMBER_OF_POLES; /* Freq = 1 / period */
+	add_to_results(he, res);
+	return get_avg_result(he);
 fail:
 	log_error("Failed to read the hall_effect sensor!");
 still:
-	return 0.0f;
+	add_to_results(he, 0);
+	return get_avg_result(he);
 }
 
 void hall_effect_cleanup(sensor_halleffect_t *he) {

@@ -20,15 +20,17 @@
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
 struct tco_shmem_data_sensor *shmem_sensor_data;
 sem_t *shmem_sensor_sem;
+uint8_t shmem_sensor_open = 0; /* Incase of KILL signal, be sure to give back sem to avoid deadlock */
+
 /**
- * @brief Handler for signals. This ensures that deadlocks in shmems do not occur and  when
- * clontrold is closed
+ * @brief Handler for signals. This ensures that deadlocks in shmems do not occur and when
+ * controld is closed
  * @param sig Signal number. This is ignored since this handler is registered for the right signals already.
  */
 void handle_signals_master(int sig)
 {
 	cleanup_sensors();
-    if (shmem_sensor_sem && sem_post(shmem_sensor_sem) == -1)
+    if (shmem_sensor_open && sem_post(shmem_sensor_sem) == -1)
         log_error("sem_post: %s", strerror(errno));
     exit(0);
 }
@@ -72,10 +74,13 @@ int main(int argc, const char *argv[]) {
 		}
 		sem_wait(shmem_sensor_sem);
 		/* Enter Critical Section */
+		shmem_sensor_open = 1;
+		shmem_sensor_data->time_step++;
 		shmem_sensor_data->ultrasound_left = values_copy[0];
 		shmem_sensor_data->hall_effect_rpm = values_copy[1];
 		/* Exit Critical Section */
 		sem_post(shmem_sensor_sem);
+		shmem_sensor_open = 0;
 		usleep(UPDATE_RATE);
 	}
 

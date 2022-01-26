@@ -20,7 +20,6 @@
 int log_level = LOG_INFO | LOG_DEBUG | LOG_ERROR;
 struct tco_shmem_data_plan *plan_data;
 sem_t *plan_data_sem;
-
 /**
  * @brief Handler for signals. This ensures that deadlocks in shmems do not occur and  when
  * clontrold is closed
@@ -58,7 +57,7 @@ int main(int argc, const char *argv[]) {
 
 	void *he_1 = malloc(sizeof(int)); 
 	he_1 = (int[1]) {6}; /* pole is connect to pole 6 */
-	locks[1] = add_sensor(hall_effect_init, (void **) &he_1, hall_effect_cleanup, hall_effect_read, 1000000.0/30.0f, &(values[1]));
+	locks[1] = add_sensor(hall_effect_init, (void **) &he_1, hall_effect_cleanup, hall_effect_read, 1000000.0/60.0f, &(values[1]));
 	/* End sensor definition */
 	initialize_sensors();
 	

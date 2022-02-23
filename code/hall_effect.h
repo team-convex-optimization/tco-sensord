@@ -4,19 +4,22 @@
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "tco_libd.h"
 
 #define NANO_SEC_TO_SEC 1000000000.0f
 #define MOTOR_TO_WHEEL_RATIO 3.2f
 #define NUMBER_OF_POLES 3.0f
-#define WAIT_LIMIT 30000000UL
+#define WAIT_LIMIT 50000000UL
+#define STALL_TIMEOUT 1 /* Number of times a 0 reading must occur to report stall */
 
-#define FILTER_SIZE 3
+#define FILTER_SIZE 5
 
 typedef struct {
 	gpio_handle_t *pole;
-	float prev_results[5];
+	float prev_results[FILTER_SIZE];
+	int stall_timeout;
 } sensor_halleffect_t;
 
 /**

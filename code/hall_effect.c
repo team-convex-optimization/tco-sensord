@@ -1,5 +1,4 @@
 #include "hall_effect.h"
-#include <stdio.h>
 
 void *hall_effect_init(const void **args) {
 	log_info("Hall Effect sensor is being initialized");
@@ -7,6 +6,8 @@ void *hall_effect_init(const void **args) {
 
 	sensor_halleffect_t *he = (sensor_halleffect_t *)malloc(sizeof(sensor_halleffect_t));
 	he->pole = (gpio_handle_t *)malloc(sizeof(gpio_handle_t));
+	he->stall_timeout = STALL_TIMEOUT;
+	memset(he->prev_results, 0.0f, FILTER_SIZE * sizeof(float));
 	error_t err = gpio_handle_get(he->pole, he_pin/32, GPIO_DIR_IN, he_pin%32);
 
 	if (err != ERR_OK) {
@@ -82,11 +83,15 @@ double hall_effect_read(sensor_halleffect_t *he) {
 	if (time < 0) time = 1000.0f; 
 	double res =  (1.0/time) * MOTOR_TO_WHEEL_RATIO * NUMBER_OF_POLES; /* Freq = 1 / period */
 	add_to_results(he, res);
+	he->stall_timeout = STALL_TIMEOUT;
 	return get_avg_result(he);
 fail:
 	log_error("Failed to read the hall_effect sensor!");
 still:
-	add_to_results(he, 0);
+	if (he->stall_timeout-- <= 0)
+	{
+		add_to_results(he, 0);
+	}
 	return get_avg_result(he);
 }
 

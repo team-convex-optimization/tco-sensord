@@ -10,10 +10,12 @@
 
 #define NANO_SEC_TO_SEC 1000000000.0f
 #define SPEED_OF_SOUND_CM_HALF 17150 /* (1/2)speed of sound in cm/s. */
+#define AVG_FILTER_SIZE 4
 
 typedef struct {
     gpio_handle_t *trig;
     gpio_handle_t *echo;
+    double prev_measures[AVG_FILTER_SIZE];
 } sensor_ultrasound;
 
 /**

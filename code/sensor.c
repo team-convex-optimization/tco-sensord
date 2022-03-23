@@ -24,9 +24,8 @@ void *sensor_start(void *ptr) {
 	sensor_t *sensor = (sensor_t *)ptr;
 	while (1) {
 		pthread_mutex_lock(&sensor->mutex);
-		*sensor->result = (*sensor->read)(sensor->reference); /* TODO: Add mutex */
+		*(sensor->result) = (*sensor->read)(sensor->reference); 
 		pthread_mutex_unlock(&sensor->mutex);
-		printf("read value %f\n", *sensor->result);
 		usleep(sensor->interval);
 	}
 	return NULL;
